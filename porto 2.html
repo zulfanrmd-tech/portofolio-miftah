@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Miftahul Zulfan Ramadhan — Developer, Photographer & Entrepreneur</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap');
+
+        :root {
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+            --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #09090b;
+            color: #fafafa;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, .font-display {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        /* Subtle Film Grain Texture */
+        .noise-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            pointer-events: none;
+            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* Penyesuaian khusus agar logo Apparel (hitam) terlihat putih tajam di tema gelap & ter-crop rapi */
+        .logo-apparel-fix {
+            filter: invert(1) brightness(1.2);
+            transform: scale(2.4); /* Memperbesar ikon tengah karena gambar asli memiliki margin luas */
+            transform-origin: center;
+        }
+
+        /* Masked Text Reveal Animation */
+        .reveal-mask {
+            overflow: hidden;
+            display: inline-block;
+            vertical-align: bottom;
+        }
+        .reveal-text {
+            display: inline-block;
+            transform: translateY(110%);
+            transition: transform 1.1s var(--ease-out-expo);
+        }
+        .is-visible .reveal-text {
+            transform: translateY(0%);
+        }
+
+        /* Smooth Fade Up */
+        .fade-up {
+            opacity: 0;
+            transform: translateY(28px);
+            transition: opacity 0.9s var(--ease-out-expo), transform 0.9s var(--ease-out-expo);
+        }
+        .fade-up.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Interactive Spotlight Card */
+        .spotlight-card {
+            position: relative;
+            background: #121215;
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            overflow: hidden;
+            transition: border-color 0.4s ease, transform 0.5s var(--ease-out-expo);
+        }
+        .spotlight-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(
+                600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+                rgba(255, 255, 255, 0.06),
+                transparent 40%
+            );
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+        .spotlight-card:hover::before {
+            opacity: 1;
+        }
+        .spotlight-card:hover {
+            border-color: rgba(255, 255, 255, 0.18);
+            transform: translateY(-4px);
+        }
+
+        /* Infinite Seamless Marquee */
+        .marquee-track {
+            display: flex;
+            width: max-content;
+            animation: marquee 28s linear infinite;
+        }
+        .marquee-track:hover {
+            animation-play-state: paused;
+        }
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* Portfolio Image Clip-Path & Scale */
+        .img-wrapper {
+            clip-path: inset(0 0 0 0 round 12px);
+            transition: clip-path 0.6s var(--ease-out-expo);
+        }
+        .portfolio-item:hover .img-wrapper {
+            clip-path: inset(4px 4px 4px 4px round 10px);
+        }
+        .portfolio-item img {
+            transition: transform 0.8s var(--ease-out-expo), filter 0.5s ease;
+            filter: grayscale(25%);
+        }
+        .portfolio-item:hover img {
+            transform: scale(1.06);
+            filter: grayscale(0%);
+        }
+
+        /* Custom Cursor Follower */
+        #cursor-dot {
+            width: 8px;
+            height: 8px;
+            background: #3b82f6;
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9998;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s var(--ease-out-expo), height 0.3s var(--ease-out-expo), background 0.3s ease;
+        }
+        #cursor-dot.hovering {
+            width: 42px;
+            height: 42px;
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.5);
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-blue-500 selection:text-white">
+
+    <!-- Organic Film Grain & Custom Cursor -->
+    <div class="noise-bg"></div>
+    <div id="cursor-dot" class="hidden md:block"></div>
+
+    <!-- Scroll Progress Indicator -->
+    <div id="scroll-progress" class="fixed top-0 left-0 h-[2px] bg-blue-500 z-50 transition-all duration-150" style="width: 0%;"></div>
+
+    <!-- Navbar dengan 2 Logo di Kiri Atas -->
+    <nav id="navbar" class="fixed w-full z-40 top-0 left-0 transition-all duration-500 py-4">
+        <div class="max-w-6xl mx-auto px-6 flex justify-between items-center">
+            
+            <!-- Grup 2 Logo di Sisi Kiri Atas -->
+            <a href="#" class="flex items-center gap-3.5 group magnetic" data-strength="15">
+                <!-- Logo 1: MASOTOKZ Web Developer -->
+                <div class="h-10 sm:h-11 flex items-center">
+                    <img 
+                        src="MASOTOKZ Web Developer Logo.png" 
+                        alt="MASOTOKZ Web Developer" 
+                        class="h-full w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+                    >
+                </div>
+
+                <!-- Garis Pemisah Vertikal Halus -->
+                <span class="h-7 w-[1px] bg-zinc-800"></span>
+
+                <!-- Logo 2: MASOTOKZ Apparel -->
+                <div class="w-10 h-10 sm:w-11 sm:h-11 overflow-hidden flex items-center justify-center rounded-lg">
+                    <img 
+                        src="logo_apparel_page-0001-removebg-preview.png" 
+                        alt="MASOTOKZ Apparel" 
+                        class="w-full h-full object-contain logo-apparel-fix transition-transform duration-300 group-hover:scale-[2.55]"
+                    >
+                </div>
+            </a>
+
+            <!-- Menu Navigasi -->
+            <div class="hidden md:flex space-x-8 text-xs uppercase tracking-widest font-medium text-zinc-400">
+                <a href="#tentang" class="hover:text-white transition-colors">Profil</a>
+                <a href="#bisnis" class="hover:text-white transition-colors">Bisnis</a>
+                <a href="#portofolio" class="hover:text-white transition-colors">Karya</a>
+                <a href="#kontak" class="hover:text-white transition-colors">Kontak</a>
+            </div>
+
+            <a href="#kontak" class="magnetic px-5 py-2.5 text-xs font-semibold rounded-full bg-white text-black hover:bg-zinc-200 transition-colors" data-strength="25">
+                Mulai Diskusi
+            </a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="min-h-screen flex flex-col justify-center pt-28 pb-12 px-6 relative">
+        <div class="max-w-6xl mx-auto w-full">
+            <div class="fade-up mb-6 flex items-center gap-3">
+                <span class="inline-flex h-2 w-2 rounded-full bg-emerald-400 animate-ping"></span>
+                <span class="text-xs font-medium tracking-widest uppercase text-zinc-400">
+                    Mahasiswa ITB AAS Indonesia &bull; Surakarta
+                </span>
+            </div>
+
+            <h1 class="text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight text-white leading-[1.08] mb-8 hero-trigger">
+                <span class="reveal-mask"><span class="reveal-text" style="transition-delay: 0.05s;">MIFTAHUL ZULFAN</span></span><br>
+                <span class="reveal-mask"><span class="reveal-text text-zinc-400" style="transition-delay: 0.18s;">RAMADHAN.</span></span>
+            </h1>
+
+            <div class="grid md:grid-cols-12 gap-8 items-end fade-up" style="transition-delay: 0.35s;">
+                <p class="md:col-span-7 text-zinc-400 text-base md:text-lg leading-relaxed">
+                    Menulis kode yang presisi sebagai <span class="text-white font-medium">Web Developer</span>, menangkap cerita lewat lensa sebagai <span class="text-white font-medium">Fotografer</span>, serta mengelola usaha mandiri di sektor <span class="text-white font-medium">Custom Apparel</span> dan <span class="text-white font-medium">Daur Ulang Kertas Bekas</span>.
+                </p>
+                <div class="md:col-span-5 flex md:justify-end gap-4">
+                    <a href="#portofolio" class="magnetic px-6 py-3.5 rounded-full bg-blue-600 hover:bg-blue-500 text-white font-medium text-sm transition-colors" data-strength="20">
+                        Eksplorasi Karya
+                    </a>
+                    <a href="#bisnis" class="magnetic px-6 py-3.5 rounded-full border border-zinc-800 hover:border-zinc-600 text-zinc-300 hover:text-white font-medium text-sm transition-colors" data-strength="20">
+                        Lini Usaha
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subtle Editorial Marquee -->
+        <div class="w-full overflow-hidden border-y border-zinc-900 py-4 mt-20">
+            <div class="marquee-track text-xs uppercase tracking-[0.25em] text-zinc-500 font-medium">
+                <span class="mx-6">Web Development</span> &bull;
+                <span class="mx-6">Commercial Photography</span> &bull;
+                <span class="mx-6">Custom Apparel Production</span> &bull;
+                <span class="mx-6">Paper Recycling & Waste Management</span> &bull;
+                <span class="mx-6">ITB AAS Indonesia</span> &bull;
+                <span class="mx-6">Web Development</span> &bull;
+                <span class="mx-6">Commercial Photography</span> &bull;
+                <span class="mx-6">Custom Apparel Production</span> &bull;
+                <span class="mx-6">Paper Recycling & Waste Management</span> &bull;
+                <span class="mx-6">ITB AAS Indonesia</span> &bull;
+            </div>
+        </div>
+    </section>
+
+    <!-- Tentang & Pendidikan -->
+    <section id="tentang" class="py-24 px-6">
+        <div class="max-w-6xl mx-auto grid md:grid-cols-12 gap-12 items-start">
+            <div class="md:col-span-5 fade-up">
+                <span class="text-xs font-semibold uppercase tracking-widest text-blue-500 block mb-3">01 / Latar Belakang</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-white leading-tight mb-6">
+                    Perpaduan Teknologi, Visual & Wirausaha.
+                </h2>
+                <div class="p-5 rounded-2xl bg-zinc-900/60 border border-zinc-800/80">
+                    <p class="text-[11px] text-zinc-500 uppercase tracking-wider mb-1">Afiliasi Akademik</p>
+                    <p class="font-bold text-white text-base">Institut Teknologi Bisnis AAS Indonesia</p>
+                    <p class="text-xs text-zinc-400 mt-1">S1 Informatika &bull; Mahasiswa Aktif</p>
+                </div>
+            </div>
+
+            <div class="md:col-span-7 space-y-6 fade-up" style="transition-delay: 0.15s;">
+                <p class="text-zinc-300 text-base md:text-lg leading-relaxed">
+                    Saya percaya bahwa keterampilan digital dan pemahaman bisnis lapangan harus berjalan beriringan. Di bangku kuliah <strong class="text-white">ITB AAS Indonesia</strong>, saya mendalami rekayasa perangkat lunak dan pengembangan web modern.
+                </p>
+                <p class="text-zinc-400 text-sm md:text-base leading-relaxed">
+                    Di luar layar monitor, kepekaan visual saya salurkan melalui fotografi—baik untuk kebutuhan produk maupun dokumentasi. Secara bersamaan, saya menggerakkan dua sektor bisnis riil: produksi pakaian custom (apparel) dan pengepulan kertas bekas untuk didaur ulang.
+                </p>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4">
+                    <div class="p-4 rounded-xl bg-zinc-900/40 border border-zinc-800/60">
+                        <i class="fas fa-code text-blue-400 mb-2"></i>
+                        <p class="text-xs font-semibold text-white">Frontend & Web</p>
+                    </div>
+                    <div class="p-4 rounded-xl bg-zinc-900/40 border border-zinc-800/60">
+                        <i class="fas fa-camera-retro text-purple-400 mb-2"></i>
+                        <p class="text-xs font-semibold text-white">Fotografi</p>
+                    </div>
+                    <div class="p-4 rounded-xl bg-zinc-900/40 border border-zinc-800/60">
+                        <i class="fas fa-shirt text-amber-400 mb-2"></i>
+                        <p class="text-xs font-semibold text-white">Apparel</p>
+                    </div>
+                    <div class="p-4 rounded-xl bg-zinc-900/40 border border-zinc-800/60">
+                        <i class="fas fa-recycle text-emerald-400 mb-2"></i>
+                        <p class="text-xs font-semibold text-white">Kertas Bekas</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bisnis Section -->
+    <section id="bisnis" class="py-24 px-6 border-t border-zinc-900">
+        <div class="max-w-6xl mx-auto">
+            <div class="mb-14 fade-up">
+                <span class="text-xs font-semibold uppercase tracking-widest text-blue-500 block mb-3">02 / Ekosistem Usaha</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-white">Dua Sektor Bisnis Mandiri</h2>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Bisnis 1: Apparel -->
+                <div class="spotlight-card p-8 md:p-10 rounded-3xl fade-up">
+                    <div class="flex justify-between items-start mb-8">
+                        <div class="w-12 h-12 rounded-2xl bg-zinc-800/80 border border-zinc-700/50 flex items-center justify-center text-white">
+                            <i class="fas fa-tshirt text-lg"></i>
+                        </div>
+                        <span class="text-xs font-mono text-zinc-500">UNIT 01</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-3">MASOTOKZ Custom Apparel</h3>
+                    <p class="text-zinc-400 text-sm leading-relaxed mb-8">
+                        Produksi berbagai kebutuhan sandang mulai dari kaos cotton combed, jersey olahraga, kemeja/workshirt, hingga jaket untuk komunitas, perusahaan, maupun brand lokal dengan standar jahitan dan sablon presisi.
+                    </p>
+                    <div class="flex items-center justify-between pt-6 border-t border-zinc-800/80">
+                        <span class="text-xs text-zinc-500">Satuan & Partai Besar</span>
+                        <a href="https://wa.me/6282223525106?text=Halo%20Zulfan,%20saya%20tertarik%20order%20di%20MASOTOKZ%20Apparel" target="_blank" class="inline-flex items-center text-xs font-semibold text-white hover:text-blue-400 transition-colors group">
+                            Pesan Sekarang <i class="fas fa-arrow-up-right-from-square ml-2 text-[10px] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Bisnis 2: Kertas Bekas -->
+                <div class="spotlight-card p-8 md:p-10 rounded-3xl fade-up" style="transition-delay: 0.15s;">
+                    <div class="flex justify-between items-start mb-8">
+                        <div class="w-12 h-12 rounded-2xl bg-zinc-800/80 border border-zinc-700/50 flex items-center justify-center text-emerald-400">
+                            <i class="fas fa-box-open text-lg"></i>
+                        </div>
+                        <span class="text-xs font-mono text-zinc-500">UNIT 02</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-3">Pengelolaan & Jual Beli Kertas Bekas</h3>
+                    <p class="text-zinc-400 text-sm leading-relaxed mb-8">
+                        Menampung dan menyalurkan berbagai jenis limbah kertas (kardus, kertas arsip/HVS, koran, buku, serta limbah percetakan) menuju pabrik daur ulang. Timbangan transparan dan siap jemput untuk volume besar.
+                    </p>
+                    <div class="flex items-center justify-between pt-6 border-t border-zinc-800/80">
+                        <span class="text-xs text-zinc-500">Kantor, Kampus & Rumah Tangga</span>
+                        <a href="https://wa.me/6282223525106?text=Halo%20Zulfan,%20saya%20ingin%20menjual/bekerja%20sama%20terkait%20kertas%20bekas" target="_blank" class="inline-flex items-center text-xs font-semibold text-white hover:text-emerald-400 transition-colors group">
+                            Jual Stok Kertas <i class="fas fa-arrow-up-right-from-square ml-2 text-[10px] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portofolio Section -->
+    <section id="portofolio" class="py-24 px-6 border-t border-zinc-900">
+        <div class="max-w-6xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between md:items-end mb-14 gap-6 fade-up">
+                <div>
+                    <span class="text-xs font-semibold uppercase tracking-widest text-blue-500 block mb-3">03 / Karya Terpilih</span>
+                    <h2 class="text-3xl md:text-4xl font-bold text-white">Web & Fotografi</h2>
+                </div>
+                <!-- Filter Buttons -->
+                <div class="flex space-x-2 bg-zinc-900/80 p-1.5 rounded-full border border-zinc-800 w-fit">
+                    <button onclick="filterPortfolio('all', this)" class="filter-btn px-4 py-1.5 rounded-full text-xs font-medium bg-white text-black transition-all">Semua</button>
+                    <button onclick="filterPortfolio('web', this)" class="filter-btn px-4 py-1.5 rounded-full text-xs font-medium text-zinc-400 hover:text-white transition-all">Web Dev</button>
+                    <button onclick="filterPortfolio('foto', this)" class="filter-btn px-4 py-1.5 rounded-full text-xs font-medium text-zinc-400 hover:text-white transition-all">Fotografi</button>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8" id="portfolio-grid">
+                <!-- Item 1 -->
+                <div class="portfolio-item web fade-up group cursor-pointer">
+                    <div class="img-wrapper h-60 bg-zinc-900 mb-4 overflow-hidden relative">
+                        <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80" alt="Web Project" class="w-full h-full object-cover">
+                    </div>
+                    <div class="flex justify-between items-center text-xs text-zinc-500 mb-1">
+                        <span>WEB DEVELOPMENT</span>
+                        <span>2026</span>
+                    </div>
+                    <h3 class="font-bold text-white text-lg group-hover:text-blue-400 transition-colors">Katalog & Order System Apparel</h3>
+                </div>
+
+                <!-- Item 2 -->
+                <div class="portfolio-item foto fade-up group cursor-pointer" style="transition-delay: 0.1s;">
+                    <div class="img-wrapper h-60 bg-zinc-900 mb-4 overflow-hidden relative">
+                        <img src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=800&q=80" alt="Photography Project" class="w-full h-full object-cover">
+                    </div>
+                    <div class="flex justify-between items-center text-xs text-zinc-500 mb-1">
+                        <span>FOTOGRAFI</span>
+                        <span>2026</span>
+                    </div>
+                    <h3 class="font-bold text-white text-lg group-hover:text-blue-400 transition-colors">Editorial & Product Lookbook</h3>
+                </div>
+
+                <!-- Item 3 -->
+                <div class="portfolio-item web fade-up group cursor-pointer" style="transition-delay: 0.2s;">
+                    <div class="img-wrapper h-60 bg-zinc-900 mb-4 overflow-hidden relative">
+                        <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80" alt="Company Profile" class="w-full h-full object-cover">
+                    </div>
+                    <div class="flex justify-between items-center text-xs text-zinc-500 mb-1">
+                        <span>WEB DEVELOPMENT</span>
+                        <span>2026</span>
+                    </div>
+                    <h3 class="font-bold text-white text-lg group-hover:text-blue-400 transition-colors">Company Profile UMKM Lokal</h3>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Kontak Section -->
+    <section id="kontak" class="py-24 px-6 border-t border-zinc-900">
+        <div class="max-w-5xl mx-auto">
+            <div class="spotlight-card rounded-3xl p-8 md:p-14 text-center fade-up">
+                <span class="text-xs font-semibold uppercase tracking-widest text-blue-500 block mb-3">04 / Kontak</span>
+                <h2 class="text-3xl md:text-5xl font-bold text-white mb-4">Mari Terhubung.</h2>
+                <p class="text-zinc-400 text-sm md:text-base max-w-lg mx-auto mb-10">
+                    Terbuka untuk proyek pengembangan website, sesi pemotretan, pemesanan apparel custom, maupun kerja sama suplai kertas bekas.
+                </p>
+
+                <div class="grid sm:grid-cols-3 gap-4 max-w-2xl mx-auto">
+                    <!-- WhatsApp -->
+                    <a href="https://wa.me/6282223525106" target="_blank" class="magnetic p-5 rounded-2xl bg-zinc-900/90 border border-zinc-800 hover:border-emerald-500/60 transition-colors flex flex-col items-center" data-strength="15">
+                        <i class="fab fa-whatsapp text-2xl text-emerald-400 mb-2"></i>
+                        <span class="font-semibold text-white text-sm">WhatsApp</span>
+                        <span class="text-xs text-zinc-500 mt-0.5">0822-2352-5106</span>
+                    </a>
+
+                    <!-- Instagram -->
+                    <a href="https://instagram.com/zlfnrmdn" target="_blank" class="magnetic p-5 rounded-2xl bg-zinc-900/90 border border-zinc-800 hover:border-pink-500/60 transition-colors flex flex-col items-center" data-strength="15">
+                        <i class="fab fa-instagram text-2xl text-pink-400 mb-2"></i>
+                        <span class="font-semibold text-white text-sm">Instagram</span>
+                        <span class="text-xs text-zinc-500 mt-0.5">@zlfnrmdn</span>
+                    </a>
+
+                    <!-- TikTok -->
+                    <a href="https://tiktok.com/@zlfnrmdn" target="_blank" class="magnetic p-5 rounded-2xl bg-zinc-900/90 border border-zinc-800 hover:border-cyan-400/60 transition-colors flex flex-col items-center" data-strength="15">
+                        <i class="fab fa-tiktok text-2xl text-cyan-400 mb-2"></i>
+                        <span class="font-semibold text-white text-sm">TikTok</span>
+                        <span class="text-xs text-zinc-500 mt-0.5">@zlfnrmdn</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-8 px-6 border-t border-zinc-900 text-center text-xs text-zinc-600">
+        <p>&copy; 2026 Miftahul Zulfan Ramadhan &mdash; MASOTOKZ &bull; ITB AAS Indonesia.</p>
+    </footer>
+
+    <!-- Interactive & Organic Motion Scripts -->
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                document.querySelector('.hero-trigger').classList.add('is-visible');
+            }, 100);
+        });
+
+        const observerOptions = {
+            threshold: 0.12,
+            rootMargin: '0px 0px -40px 0px'
+        };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+        document.querySelectorAll('.spotlight-card').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+            });
+        });
+
+        document.querySelectorAll('.magnetic').forEach(el => {
+            const strength = el.getAttribute('data-strength') || 20;
+            el.addEventListener('mousemove', e => {
+                const rect = el.getBoundingClientRect();
+                const x = (e.clientX - rect.left - rect.width / 2) / rect.width * strength;
+                const y = (e.clientY - rect.top - rect.height / 2) / rect.height * strength;
+                el.style.transform = `translate(${x}px, ${y}px)`;
+            });
+            el.addEventListener('mouseleave', () => {
+                el.style.transform = 'translate(0px, 0px)';
+                el.style.transition = 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
+            });
+            el.addEventListener('mouseenter', () => {
+                el.style.transition = 'none';
+            });
+        });
+
+        const cursor = document.getElementById('cursor-dot');
+        let mouseX = 0, mouseY = 0, cursorX = 0, cursorY = 0;
+
+        document.addEventListener('mousemove', e => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        function animateCursor() {
+            cursorX += (mouseX - cursorX) * 0.18;
+            cursorY += (mouseY - cursorY) * 0.18;
+            cursor.style.left = cursorX + 'px';
+            cursor.style.top = cursorY + 'px';
+            requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+
+        document.querySelectorAll('a, button, .portfolio-item').forEach(el => {
+            el.addEventListener('mouseenter', () => cursor.classList.add('hovering'));
+            el.addEventListener('mouseleave', () => cursor.classList.remove('hovering'));
+        });
+
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const scrollPercent = (scrollTop / docHeight) * 100;
+            document.getElementById('scroll-progress').style.width = scrollPercent + '%';
+
+            const nav = document.getElementById('navbar');
+            if (scrollTop > 40) {
+                nav.classList.add('bg-zinc-950/85', 'backdrop-blur-md', 'border-b', 'border-zinc-900', 'py-3');
+                nav.classList.remove('py-4');
+            } else {
+                nav.classList.remove('bg-zinc-950/85', 'backdrop-blur-md', 'border-b', 'border-zinc-900', 'py-3');
+                nav.classList.add('py-4');
+            }
+        });
+
+        function filterPortfolio(category, btnElement) {
+            const items = document.querySelectorAll('.portfolio-item');
+            const buttons = document.querySelectorAll('.filter-btn');
+
+            buttons.forEach(btn => {
+                btn.classList.remove('bg-white', 'text-black');
+                btn.classList.add('text-zinc-400');
+            });
+
+            btnElement.classList.remove('text-zinc-400');
+            btnElement.classList.add('bg-white', 'text-black');
+
+            items.forEach(item => {
+                item.style.opacity = '0';
+                item.style.transform = 'scale(0.96)';
+                setTimeout(() => {
+                    if (category === 'all' || item.classList.contains(category)) {
+                        item.style.display = 'block';
+                        setTimeout(() => {
+                            item.style.opacity = '1';
+                            item.style.transform = 'scale(1)';
+                        }, 30);
+                    } else {
+                        item.style.display = 'none';
+                    }
+                }, 200);
+            });
+        }
+    </script>
+</body>
+</html>
